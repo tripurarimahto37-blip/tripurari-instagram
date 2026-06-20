@@ -1,44 +1,63 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Indiagram</title>
 
 <style>
 body{
-    margin:0;
-    background:#fafafa;
-    font-family:Arial,sans-serif;
+margin:0;
+font-family:Arial,sans-serif;
+background:#fafafa;
 }
+
 .header{
-    background:white;
-    padding:15px;
-    text-align:center;
-    font-size:28px;
-    font-weight:bold;
-    border-bottom:1px solid #ddd;
+background:white;
+padding:15px;
+font-size:28px;
+font-weight:bold;
+text-align:center;
+border-bottom:1px solid #ddd;
 }
+
+.container{
+max-width:400px;
+margin:auto;
+padding:20px;
+}
+
+input{
+width:100%;
+padding:12px;
+margin:10px 0;
+border:1px solid #ddd;
+border-radius:5px;
+}
+
+button{
+width:100%;
+padding:12px;
+background:#0095f6;
+color:white;
+border:none;
+border-radius:5px;
+font-size:16px;
+}
+
 .post{
-    max-width:500px;
-    margin:20px auto;
-    background:white;
-    border:1px solid #ddd;
+background:white;
+margin-top:20px;
+border:1px solid #ddd;
 }
-.username{
-    padding:10px;
-    font-weight:bold;
-}
+
 .post img{
-    width:100%;
-    display:block;
+width:100%;
 }
-.actions{
-    padding:10px;
-    font-size:24px;
-}
-.likes{
-    padding:0 10px 10px;
-    font-weight:bold;
+
+.username{
+padding:10px;
+font-weight:bold;
 }
 </style>
 </head>
@@ -47,19 +66,62 @@ body{
 
 <div class="header">Indiagram</div>
 
+<div class="container">
+
+<h3>Signup</h3>
+
+<input type="email" id="email" placeholder="Email">
+<input type="password" id="password" placeholder="Password">
+
+<button onclick="signup()">Create Account</button>
+
+<div id="message"></div>
+
 <div class="post">
-    <div class="username">Tripurari</div>
-
-    <img src="IMG_20260605_181943_822.webp">
-
-    <div class="actions">
-        ❤️ 💬 📤
-    </div>
-
-    <div class="likes">
-        100 Likes
-    </div>
+<div class="username">tripurari</div>
+<img src="IMG_20260605_181943_822.webp">
 </div>
+
+</div>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import {
+getAuth,
+createUserWithEmailAndPassword
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+const firebaseConfig = {
+apiKey: "AIzaSyA-iPBBGGO9JArHjp02_aw6sEfe4cPhez4",
+authDomain: "indiagram-1796d.firebaseapp.com",
+projectId: "indiagram-1796d",
+storageBucket: "indiagram-1796d.firebasestorage.app",
+messagingSenderId: "550993726424",
+appId: "1:550993726424:web:7b2195a5e359ce3db180ad",
+measurementId: "G-1Z6HLW1NGX"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+window.signup = function(){
+
+let email=document.getElementById("email").value;
+let password=document.getElementById("password").value;
+
+createUserWithEmailAndPassword(auth,email,password)
+.then(()=>{
+document.getElementById("message").innerHTML="Account Created Successfully";
+})
+.catch((error)=>{
+document.getElementById("message").innerHTML=error.message;
+});
+
+}
+
+</script>
 
 </body>
 </html>
