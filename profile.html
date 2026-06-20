@@ -1,17 +1,52 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Profile</title>
+<title>Indiagram</title>
 </head>
 <body>
 
-<h1>Welcome To Indiagram</h1>
+<h2>Create Post</h2>
 
-<img src="IMG_20260605_181943_822.webp" width="300">
+<input type="file" id="image">
 
 <br><br>
 
-<a href="index.html">Logout</a>
+<button onclick="uploadImage()">Upload Image</button>
+
+<p id="msg"></p>
+
+<img id="preview" width="300">
+
+<script>
+async function uploadImage(){
+
+const file=document.getElementById("image").files[0];
+
+if(!file){
+alert("Select image first");
+return;
+}
+
+document.getElementById("msg").innerHTML="Uploading...";
+
+const formData=new FormData();
+formData.append("file",file);
+formData.append("upload_preset","indiagram_upload");
+
+const response=await fetch(
+"https://api.cloudinary.com/v1_1/dklp1gpqb/image/upload",
+{
+method:"POST",
+body:formData
+});
+
+const data=await response.json();
+
+document.getElementById("preview").src=data.secure_url;
+
+document.getElementById("msg").innerHTML="Upload Success";
+}
+</script>
 
 </body>
 </html>
