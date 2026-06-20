@@ -46,16 +46,24 @@ color:white;
 border:none;
 border-radius:5px;
 font-size:16px;
+cursor:pointer;
+}
+
+#logoutBtn{
+background:red;
 }
 
 .post{
 background:white;
 margin-top:20px;
 border:1px solid #ddd;
+border-radius:5px;
+overflow:hidden;
 }
 
 .post img{
 width:100%;
+display:block;
 }
 
 .username{
@@ -67,13 +75,21 @@ font-weight:bold;
 display:none;
 }
 
-#logoutBtn{
-background:red;
+#message{
+margin-top:10px;
+font-weight:bold;
 }
 
-#userEmail{
-font-weight:bold;
-margin-bottom:15px;
+.profile{
+background:white;
+padding:15px;
+border:1px solid #ddd;
+margin-bottom:20px;
+border-radius:5px;
+}
+
+hr{
+margin:20px 0;
 }
 
 </style>
@@ -87,7 +103,7 @@ margin-bottom:15px;
 
 <div id="authSection">
 
-<h3>Signup / Login</h3>
+<h3>Email Signup / Login</h3>
 
 <input type="email" id="email" placeholder="Email">
 
@@ -97,19 +113,54 @@ margin-bottom:15px;
 
 <button onclick="login()">Login</button>
 
+<button onclick="resetPassword()">Forgot Password</button>
+
+<hr>
+
+<h3>Phone OTP Login</h3>
+
+<input type="text" id="phone" placeholder="+919876543210">
+
+<button onclick="sendOTP()">Send OTP</button>
+
+<input type="text" id="otp" placeholder="Enter OTP">
+
+<button onclick="verifyOTP()">Verify OTP</button>
+
+<div id="recaptcha-container"></div>
+
 <div id="message"></div>
 
 </div>
 
 <div id="feed">
 
-<div id="userEmail"></div>
+<div class="profile">
 
-<button id="logoutBtn" onclick="logout()">Logout</button>
+<h2>My Profile</h2>
+
+<div id="userEmail"></div>
+<br>
+
+<div id="userUid"></div>
+<br>
+
+<div id="verifyStatus"></div>
+
+</div>
+
+<button id="logoutBtn" onclick="logout()">
+Logout
+</button>
 
 <div class="post">
-<div class="username">tripurari</div>
+
+<div class="username">
+tripurari
+</div>
+
 <img src="IMG_20260605_181943_822.webp">
+
 </div>
 
 </div>
@@ -118,64 +169,205 @@ margin-bottom:15px;
 
 <script type="module">
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
 import {
 getAuth,
 createUserWithEmailAndPassword,
 signInWithEmailAndPassword,
+sendPasswordResetEmail,
+signInWithPhoneNumber,
+RecaptchaVerifier,
 signOut,
 onAuthStateChanged
 }
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 const firebaseConfig = {
+
 apiKey: "AIzaSyA-iPBBGGO9JArHjp02_aw6sEfe4cPhez4",
+
 authDomain: "indiagram-1796d.firebaseapp.com",
+
 projectId: "indiagram-1796d",
+
 storageBucket: "indiagram-1796d.firebasestorage.app",
+
 messagingSenderId: "550993726424",
+
 appId: "1:550993726424:web:7b2195a5e359ce3db180ad",
+
 measurementId: "G-1Z6HLW1NGX"
+
 };
 
 const app = initializeApp(firebaseConfig);
+
 const auth = getAuth(app);
+
+window.recaptchaVerifier =
+new RecaptchaVerifier(
+auth,
+"recaptcha-container",
+{
+size:"normal"
+}
+);
 
 window.signup = function(){
 
-let email = document.getElementById("email").value;
-let password = document.getElementById("password").value;
+let email =
+document.getElementById("email").value;
 
-createUserWithEmailAndPassword(auth,email,password)
+let password =
+document.getElementById("password").value;
+
+createUserWithEmailAndPassword(
+auth,
+email,
+password
+)
 
 .then(()=>{
+
 document.getElementById("message").innerHTML =
 "Account Created Successfully";
+
 })
 
 .catch((error)=>{
+
 document.getElementById("message").innerHTML =
 error.message;
+
 });
 
 }
 
 window.login = function(){
 
-let email = document.getElementById("email").value;
-let password = document.getElementById("password").value;
+let email =
+document.getElementById("email").value;
 
-signInWithEmailAndPassword(auth,email,password)
+let password =
+document.getElementById("password").value;
+
+signInWithEmailAndPassword(
+auth,
+email,
+password
+)
 
 .then(()=>{
+
 document.getElementById("message").innerHTML =
 "Login Successful";
+
 })
 
 .catch((error)=>{
+
+if(error.code==="auth/invalid-credential"){
+
+document.getElementById("message").innerHTML =
+"Wrong Email Or Password";
+
+}else{
+
 document.getElementById("message").innerHTML =
 error.message;
+
+}
+
+});
+
+}
+
+window.resetPassword = function(){
+
+let email =
+document.getElementById("email").value;
+
+if(email===""){
+
+document.getElementById("message").innerHTML =
+"Enter Email First";
+
+return;
+
+}
+
+sendPasswordResetEmail(
+auth,
+email
+)
+
+.then(()=>{
+
+document.getElementById("message").innerHTML =
+"Password Reset Email Sent";
+
+})
+
+.catch((error)=>{
+
+document.getElementById("message").innerHTML =
+error.message;
+
+});
+
+}
+
+window.sendOTP = function(){
+
+let phone =
+document.getElementById("phone").value;
+
+signInWithPhoneNumber(
+auth,
+phone,
+window.recaptchaVerifier
+)
+
+.then((confirmationResult)=>{
+
+window.confirmationResult =
+confirmationResult;
+
+document.getElementById("message").innerHTML =
+"OTP Sent Successfully";
+
+})
+
+.catch((error)=>{
+
+document.getElementById("message").innerHTML =
+error.message;
+
+});
+
+}
+
+window.verifyOTP = function(){
+
+let otp =
+document.getElementById("otp").value;
+
+window.confirmationResult.confirm(otp)
+
+.then(()=>{
+
+document.getElementById("message").innerHTML =
+"Phone Login Success";
+
+})
+
+.catch(()=>{
+
+document.getElementById("message").innerHTML =
+"Wrong OTP";
+
 });
 
 }
@@ -190,18 +382,33 @@ onAuthStateChanged(auth,(user)=>{
 
 if(user){
 
-document.getElementById("authSection").style.display="none";
+document.getElementById("authSection")
+.style.display="none";
 
-document.getElementById("feed").style.display="block";
+document.getElementById("feed")
+.style.display="block";
 
-document.getElementById("userEmail").innerHTML =
-"Welcome: " + user.email;
+document.getElementById("userEmail")
+.innerHTML =
+"Email: " + (user.email || "Phone User");
+
+document.getElementById("userUid")
+.innerHTML =
+"UID: " + user.uid;
+
+document.getElementById("verifyStatus")
+.innerHTML =
+user.emailVerified
+? "Email Verified ✅"
+: "Email Not Verified ❌";
 
 }else{
 
-document.getElementById("authSection").style.display="block";
+document.getElementById("authSection")
+.style.display="block";
 
-document.getElementById("feed").style.display="none";
+document.getElementById("feed")
+.style.display="none";
 
 }
 
